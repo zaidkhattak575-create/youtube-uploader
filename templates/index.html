@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Video Uploader</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #0f0f0f;
+    color: #f1f1f1;
+    margin: 0;
+    padding: 16px;
+  }
+  .container { max-width: 480px; margin: 0 auto; }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .subtitle { color: #aaa; font-size: 0.9rem; margin-bottom: 20px; }
+  .card {
+    background: #1c1c1c;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.connected { background: #2ecc71; }
+  .dot.disconnected { background: #e74c3c; }
+  .btn {
+    display: inline-block;
+    background: #ff0000;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    width: 100%;
+    text-align: center;
+    margin-top: 10px;
+  }
+  .btn:disabled { background: #555; }
+  label {
+    display: block;
+    font-size: 0.85rem;
+    color: #ccc;
+    margin: 14px 0 6px;
+  }
+  input[type="text"], textarea, select, input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: #111;
+    color: #fff;
+    font-size: 0.95rem;
+  }
+  textarea { resize: vertical; min-height: 80px; }
+  .flash {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 14px;
+    font-size: 0.9rem;
+    word-break: break-word;
+  }
+  .flash.success { background: #1e3d2f; color: #6fdc9a; }
+  .flash.error { background: #3d1e1e; color: #ff8080; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🎬 Video Uploader</h1>
+  <div class="subtitle">YouTube par apni marzi ke rules se upload karein</div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div class="card">
+    <div class="status">
+      {% if authorized %}
+        <span class="dot connected"></span> YouTube account connected
+      {% else %}
+        <span class="dot disconnected"></span> YouTube account connected nahi hai
+      {% endif %}
+    </div>
+    {% if not authorized %}
+      <a href="{{ url_for('authorize') }}" class="btn">YouTube Se Connect Karein</a>
+    {% endif %}
+  </div>
+
+  {% if authorized %}
+  <div class="card">
+    <form action="{{ url_for('analyze') }}" method="post" enctype="multipart/form-data" id="analyzeForm">
+      <label>Video File</label>
+      <input type="file" name="video" accept="video/*" required>
+      <p style="color:#888; font-size:0.8rem; margin-top:8px;">
+        AI khud video (frames + audio) analyze karke Title, Description aur Tags generate karega. Agle page par aap edit bhi kar sakte hain.
+      </p>
+      <button type="submit" class="btn" id="analyzeBtn">🤖 AI Se Analyze Karein</button>
+    </form>
+  </div>
+  <script>
+    document.getElementById('analyzeForm').addEventListener('submit', function() {
+      const btn = document.getElementById('analyzeBtn');
+      btn.disabled = true;
+      btn.textContent = '⏳ Analyze ho raha hai... (video length ke hisaab se 1-3 minute)';
+    });
+  </script>
+  {% endif %}
+</div>
+</body>
+</html>
+    
